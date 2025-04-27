@@ -1,0 +1,80 @@
+#to-do-list
+import tkinter as tk
+from tkinter import messagebox
+
+# File to store tasks
+TASKS_FILE = "tasks.txt"
+
+# Load tasks from file
+def load_tasks():
+    try:
+        with open(TASKS_FILE, "r") as file:
+            return file.read().splitlines()
+    except FileNotFoundError:
+        return []
+
+# Save tasks to file
+def save_tasks():
+    with open(TASKS_FILE, "w") as file:
+        file.write("\n".join(tasks))
+
+# Add task
+def add_task():
+    task = entry.get()
+    if task:
+        tasks.append(task)
+        listbox.insert(tk.END, task)
+        entry.delete(0, tk.END)
+        save_tasks()
+    else:
+        messagebox.showwarning("Warning", "Task cannot be empty!")
+
+# Remove task
+def remove_task():
+    try:
+        selected_task = listbox.curselection()[0]
+        tasks.pop(selected_task)
+        listbox.delete(selected_task)
+        save_tasks()
+    except IndexError:
+        messagebox.showwarning("Warning", "Select a task to remove.")
+
+# Mark task as complete
+def complete_task():
+    try:
+        selected_task = listbox.curselection()[0]
+        listbox.itemconfig(selected_task, {'fg': 'gray'})
+        messagebox.showinfo("Completed", f"Task '{tasks[selected_task]}' marked as complete!")
+    except IndexError:
+        messagebox.showwarning("Warning", "Select a task to mark as complete.")
+
+# GUI setup
+root = tk.Tk()
+root.title("To-Do List")
+
+tasks = load_tasks()
+
+frame = tk.Frame(root)
+frame.pack(pady=10)
+
+listbox = tk.Listbox(frame, width=40, height=10)
+listbox.pack(side=tk.LEFT)
+
+scrollbar = tk.Scrollbar(frame, command=listbox.yview)
+scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+listbox.config(yscrollcommand=scrollbar.set)
+
+for task in tasks:
+    listbox.insert(tk.END, task)
+
+entry = tk.Entry(root, width=40)
+entry.pack(pady=5)
+
+button_frame = tk.Frame(root)
+button_frame.pack()
+
+tk.Button(button_frame, text="Add Task", command=add_task).grid(row=0, column=0)
+tk.Button(button_frame, text="Remove Task", command=remove_task).grid(row=0, column=1)
+tk.Button(button_frame, text="Complete Task", command=complete_task).grid(row=0, column=2)
+
+root.mainloop()
